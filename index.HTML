@@ -26,7 +26,7 @@
       flex-direction: row;
       width: 100%;
       max-width: 1200px;
-      margin: 10px 20px 40px;
+      margin: 10px 20px 60px;
       gap: 20px;
     }
     .left, .right {
@@ -77,11 +77,6 @@
     .solution {
       line-height: 1.6;
     }
-
-body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
     footer {
       position: fixed;
       bottom: 0;
@@ -92,27 +87,20 @@ body {
       background: #f0f0f0;
       color: #333;
       border-top: 1px solid #ccc;
-
-      /* chống copy / bôi đen */
       user-select: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
     }
-
-
-
   </style>
 </head>
 <body>
   <h1>BÀI TOÁN TỐI ƯU LỢI NHUẬN HÀM BẬC HAI</h1>
-<b style="color: blue;">
-  --Không có toán học, bạn chẳng thể làm được gì. Mọi thứ quanh ta đều là toán học--
-</b>
+  <b style="color: blue;">
+    --Không có toán học, bạn chẳng thể làm được gì. Mọi thứ quanh ta đều là toán học--
+  </b>
+  <p style="text-align: right; color: goldenrod; font-weight: bold;">
+    Shakuntala Devi (1929–2013)
+  </p>
 
-<p style="text-align: right; color: goldenrod; font-weight: bold;">
-  Shakuntala Devi (1929–2013)
-</p>  <div class="container">
+  <div class="container">
     <div class="left">
       <h2>Bài toán</h2>
       <div class="problem" id="problem-text">
@@ -136,13 +124,14 @@ body {
           <label>Số sp tăng thêm r =
             <input type="number" id="r" value="5" oninput="updateProblem()">
           </label>
-          </div>
- 	<div class="form-row">
+        </div>
 
-	<label>Chi phí c =
+        <div class="form-row">
+          <label>Chi phí c =
             <input type="number" id="c" value="40" oninput="updateProblem()">
           </label>
-	</div>
+        </div>
+
         <button type="button" onclick="solve()">Giải</button>
       </form>
     </div>
@@ -154,6 +143,8 @@ body {
       </div>
     </div>
   </div>
+
+  <footer id="copyright"></footer>
 
   <script>
     function updateProblem() {
@@ -190,7 +181,6 @@ body {
       const xVertex = -B / (2 * A);
       let xOpt = Math.round(xVertex);
 
-      // Ràng buộc: 0 <= x <= a/K
       const xMax = Math.floor(a / K);
       if (xOpt < 0) xOpt = 0;
       if (xOpt > xMax) xOpt = xMax;
@@ -207,7 +197,7 @@ body {
 
         Rút gọn: \\(L(x) = ${A}x^2 + ${B}x + ${C}\\).<br><br>
 
-        L(x) Hàm bậc hai với hệ số \\(A = ${A} < 0\\) nên L(x) có giá trị lớn nhất đạt hoành độ đỉnh của parabol.<br>
+        Hàm bậc hai với hệ số \\(A = ${A} < 0\\) nên có cực đại tại đỉnh parabol.<br>
         Hoành độ đỉnh: \\(x^* = -\\tfrac{B}{2A} = ${xVertex.toFixed(2)}\\).<br><br>
 
         Vậy số lần giảm giá tối ưu: \\(x \\approx ${xOpt}\\).<br>
@@ -217,35 +207,16 @@ body {
       `;
 
       document.getElementById("solution").innerHTML = solutionText;
-      MathJax.typeset(); // render lại công thức
+      MathJax.typeset();
     }
 
     window.onload = updateProblem;
+
+    // Footer Base64: "© 2025 Lê Văn Quý+GPT. All rights reserved."
+    const b64Copyright = "wqkgMjAyNSBMw6ogVsSDbiBRdeG6o25nK0dQVC4gQWxsIHJpZ2h0cyByZXNlcnZlZC4=";
+    const bytes = Uint8Array.from(atob(b64Copyright), c => c.charCodeAt(0));
+    const text  = new TextDecoder("utf-8").decode(bytes);
+    document.getElementById("copyright").textContent = text;
   </script>
 </body>
-<meta charset="UTF-8">
-<footer id="copyright"></footer>
-
-<script>
-  // Base64 đúng (chữ Quý)
-  const b64Copyright = "TMOqIFbEg24gUXXDvSwgVEhQVCBCw6xuaCBTxqFuLCBRdeG6o25nIE5nw6Np";
-
-  const bytes = Uint8Array.from(atob(b64Copyright), c => c.charCodeAt(0));
-  const text  = new TextDecoder("utf-8").decode(bytes);
-
-  // Kiểm tra nhanh trên console: phải in đúng "© 2025 Lê Văn Quý+GPT. All rights reserved."
-  console.log(text);
-
-  document.getElementById("copyright").textContent = text;
-
-  // (tuỳ chọn) chặn chuột phải & Ctrl+C như bạn đã làm
-  document.addEventListener("contextmenu", e => e.preventDefault());
-  document.addEventListener("keydown", e => {
-    if (e.ctrlKey && e.key.toLowerCase() === "c") {
-      e.preventDefault();
-      alert("!");
-    }
-  });
-</script>
-
 </html>
