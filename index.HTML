@@ -3,9 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <title>Bài toán tối ưu lợi nhuận</title>
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script id="MathJax-script" async
-          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <!-- KaTeX CSS & JS (nhanh hơn MathJax) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body);"></script>
+
   <style>
     body {
       font-family: "Segoe UI", Tahoma, sans-serif;
@@ -26,15 +30,15 @@
       flex-direction: row;
       width: 100%;
       max-width: 1200px;
-      margin: 10px 20px 60px;
+      margin: 10px 20px 40px;
       gap: 20px;
     }
     .left, .right {
       flex: 1;
       background: #ffffff;
       padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
     h2 {
       color: #b83280;
@@ -42,14 +46,14 @@
     }
     .problem {
       background: #fff0f6;
-      border-left: 6px solid #b83280;
+      border-left: 4px solid #b83280;
       padding: 10px;
       margin-bottom: 20px;
-      border-radius: 6px;
+      border-radius: 4px;
     }
     .form-row {
       display: flex;
-      gap: 20px;
+      gap: 15px;
       margin-top: 10px;
       align-items: center;
     }
@@ -63,13 +67,14 @@
     }
     button {
       margin-top: 15px;
-      padding: 10px 18px;
+      padding: 8px 16px;
       background: #b83280;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 15px;
+      font-size: 14px;
+      transition: 0.3s;
     }
     button:hover {
       background: #97266d;
@@ -82,20 +87,42 @@
       bottom: 0;
       width: 100%;
       text-align: center;
+      padding: 8px;
+      font-size: 12px;
+      background: #f9f9f9;
+      color: #333;
+      border-top: 1px solid #ccc;
+      user-select: none;
+    }
+body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
       padding: 10px;
       font-size: 14px;
       background: #f0f0f0;
       color: #333;
       border-top: 1px solid #ccc;
+
+      /* chống copy / bôi đen */
       user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
     }
+
   </style>
 </head>
 <body>
   <h1>BÀI TOÁN TỐI ƯU LỢI NHUẬN HÀM BẬC HAI</h1>
-  <b style="color: blue;">
+  <blockquote style="color:blue; margin:0; font-weight:bold;">
     --Không có toán học, bạn chẳng thể làm được gì. Mọi thứ quanh ta đều là toán học--
-  </b>
+  </blockquote>
   <p style="text-align: right; color: goldenrod; font-weight: bold;">
     Shakuntala Devi (1929–2013)
   </p>
@@ -110,28 +137,25 @@
       <form id="params">
         <div class="form-row">
           <label>Giá gốc a =
-            <input type="number" id="a" value="100" oninput="updateProblem()">
+            <input type="number" id="a" value="100">
           </label>
           <label>Sản lượng ban đầu q =
-            <input type="number" id="q" value="50" oninput="updateProblem()">
+            <input type="number" id="q" value="50">
           </label>
         </div>
-
         <div class="form-row">
           <label>Mỗi lần giảm giá K =
-            <input type="number" id="K" value="2" oninput="updateProblem()">
+            <input type="number" id="K" value="2">
           </label>
           <label>Số sp tăng thêm r =
-            <input type="number" id="r" value="5" oninput="updateProblem()">
+            <input type="number" id="r" value="5">
           </label>
         </div>
-
         <div class="form-row">
           <label>Chi phí c =
-            <input type="number" id="c" value="40" oninput="updateProblem()">
+            <input type="number" id="c" value="40">
           </label>
         </div>
-
         <button type="button" onclick="solve()">Giải</button>
       </form>
     </div>
@@ -144,9 +168,19 @@
     </div>
   </div>
 
-  <footer id="copyright"></footer>
-
   <script>
+    // Debounce input để tránh render liên tục
+    let debounceTimer;
+    function updateProblemDebounce() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(updateProblem, 300);
+    }
+
+    const inputs = ['a','q','K','r','c'];
+    inputs.forEach(id => {
+      document.getElementById(id).addEventListener('input', updateProblemDebounce);
+    });
+
     function updateProblem() {
       const a = document.getElementById("a").value;
       const q = document.getElementById("q").value;
@@ -156,13 +190,14 @@
 
       const problemText = `
         Một công ty bán sản phẩm với:<br>
-        - Giá gốc <b>${a}</b> nghìn đồng/sp, sản lượng ban đầu <b>q = ${q}</b> sản phẩm;<br>
-        - Nếu mỗi lần giảm giá <b>K = ${K}</b> nghìn đồng thì lượng hàng bán tăng thêm <b>r = ${r}</b> sản phẩm;<br>
-        - Chi phí sản xuất mỗi sản phẩm <b>c = ${c}</b> nghìn đồng.<br><br>
+        - Giá gốc \\(a = ${a}\\) nghìn đồng/sp, sản lượng ban đầu \\(q = ${q}\\) sản phẩm;<br>
+        - Nếu mỗi lần giảm giá \\(K = ${K}\\) nghìn đồng thì lượng hàng bán tăng thêm \\(r = ${r}\\) sản phẩm;<br>
+        - Chi phí sản xuất mỗi sản phẩm \\(c = ${c}\\) nghìn đồng.<br><br>
         Hỏi: Công ty nên giảm giá bao nhiêu lần để lợi nhuận thu được lớn nhất? 
         Lợi nhuận tối đa là bao nhiêu?
       `;
       document.getElementById("problem-text").innerHTML = problemText;
+      renderMathInElement(document.getElementById("problem-text"));
     }
 
     function solve() {
@@ -190,33 +225,51 @@
       const qOpt = q + r * xOpt;
 
       const solutionText = `
-        Gọi \\(x\\) là số lần giảm giá (nguyên, \\(0 \\leq x \\leq ${xMax}\\)).<br><br>
+        Gọi \\(x\\) là số lần giảm giá (nguyên, \\(0 \\le x \\le ${xMax}\\)).<br><br>
         - Giá bán mới: \\(p(x) = a - Kx = ${a} - ${K}x\\).<br>
         - Sản lượng: \\(q(x) = q + rx = ${q} + ${r}x\\).<br>
         - Lợi nhuận: \\(L(x) = (p(x) - c)q(x) = (${a} - ${K}x - ${c})(${q} + ${r}x)\\).<br><br>
-
         Rút gọn: \\(L(x) = ${A}x^2 + ${B}x + ${C}\\).<br><br>
-
-        Hàm bậc hai với hệ số \\(A = ${A} < 0\\) nên có cực đại tại đỉnh parabol.<br>
         Hoành độ đỉnh: \\(x^* = -\\tfrac{B}{2A} = ${xVertex.toFixed(2)}\\).<br><br>
-
         Vậy số lần giảm giá tối ưu: \\(x \\approx ${xOpt}\\).<br>
         - Giá bán: ${priceOpt} nghìn đồng/sp.<br>
         - Sản lượng: ${qOpt} sản phẩm.<br>
         - Lợi nhuận tối đa: ${LOpt} nghìn đồng.
       `;
-
       document.getElementById("solution").innerHTML = solutionText;
-      MathJax.typeset();
+      renderMathInElement(document.getElementById("solution"));
     }
 
     window.onload = updateProblem;
 
-    // Footer Base64: "© 2025 Lê Văn Quý+GPT. All rights reserved."
-    const b64Copyright = "wqkgMjAyNSBMw6ogVsSDbiBRdeG6o25nK0dQVC4gQWxsIHJpZ2h0cyByZXNlcnZlZC4=";
-    const bytes = Uint8Array.from(atob(b64Copyright), c => c.charCodeAt(0));
-    const text  = new TextDecoder("utf-8").decode(bytes);
-    document.getElementById("copyright").textContent = text;
+   
   </script>
+
+ 
 </body>
+<meta charset="UTF-8">
+<footer id="copyright"></footer>
+
+<script>
+  // Base64 đúng (chữ Quý)
+  const b64Copyright = "TMOqIFbEg24gUXXDvSwgVEhQVCBCw6xuaCBTxqFuLCBRdeG6o25nIE5nw6Np";
+
+  const bytes = Uint8Array.from(atob(b64Copyright), c => c.charCodeAt(0));
+  const text  = new TextDecoder("utf-8").decode(bytes);
+
+  // Kiểm tra nhanh trên console: phải in đúng "© 2025 Lê Văn Quý+GPT. All rights reserved."
+  console.log(text);
+
+  document.getElementById("copyright").textContent = text;
+
+  // (tuỳ chọn) chặn chuột phải & Ctrl+C như bạn đã làm
+  document.addEventListener("contextmenu", e => e.preventDefault());
+  document.addEventListener("keydown", e => {
+    if (e.ctrlKey && e.key.toLowerCase() === "c") {
+      e.preventDefault();
+      alert("!");
+    }
+  });
+</script>
+
 </html>
